@@ -1,0 +1,36 @@
+#!/bin/bash
+make > make.log
+PATNUM=9
+MIN_TRACK=(6 2 3 0 0 2 2 2 6)
+
+if [ -d "outputResult" ]; then
+    rm outputResult/*
+    rmdir outputResult
+fi
+if [ -d "checkResult" ]; then
+    rm checkResult/*
+    rmdir checkResult
+fi
+mkdir outputResult
+mkdir checkResult
+# self-testing
+for((i = 1; i <= ${PATNUM}; i = i+1)) do
+    ./Lab4 testcase/input${i}.txt outputResult/output${i}.txt 
+    ./SolutionChecker testcase/input${i}.txt outputResult/output${i}.txt  > checkResult/check${i}.log
+    myTrackNum=$(awk '{print $3; exit}' "outputResult/output${i}.txt")
+    if grep -i -q "Congratulations!! The solution is correct!" "checkResult/check${i}.log"; then
+        echo -e "\033[0;34mPass  \033[m  \033[0;32mPattern No.$i  Your track: \033[0;33m${myTrackNum}    \033[0;32mMinimum track: \033[0;33m${MIN_TRACK[$i-1]}\033[m"
+    else
+        echo -e "\033[31m--- Check Fail ---\033[0m"
+    fi
+done
+# TA demo case
+./Lab4 testcase/test5.in outputResult/test5.out
+./SolutionChecker testcase/test5.in outputResult/test5.out > checkResult/checkTA.log
+myTrackNum=$(awk '{print $3; exit}' "outputResult/test5.out")
+if grep -i -q "Congratulations!! The solution is correct!" 'checkResult/checkTA.log'; then
+    echo -e "\033[0;34mPass  \033[m  \033[0;32mPattern TA    Your track: \033[0;33m${myTrackNum}    \033[0;32mMinimum track: \033[0;33m10\033[m"
+else
+    echo -e "\033[31m--- PATTERN TA Check Fail ---\033[0m"
+fi
+echo -e "\033[0;34mCheck \"checkResult\" for detail information.\033[0m"
